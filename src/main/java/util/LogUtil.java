@@ -59,8 +59,8 @@ public class LogUtil extends OutputStream {
 
     /**
      * 清理日志输出区域jTextArea
-     * @param jTextArea
-     * @param string
+     * @param jTextArea 目标控件--输出区域
+     * @param string 输入内容
      */
     public static void clearLog(JTextArea jTextArea,String string){
         jTextArea.setText(string);
