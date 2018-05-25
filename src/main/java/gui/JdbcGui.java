@@ -262,9 +262,17 @@ class JdbcGui implements ActionListener {
         if(jButton_apply ==e.getSource()){
             loadJdbcConfig();
         }else if(jButton_clearOut == e.getSource()){
-            clearOut();
+            String content = "温馨提示：\n" +
+                    "1、参数文件需要准备足够的行数，大于或等于 并发数x迭代次数；\n" +
+                    "2、参数个数要与sql中的?个数对应；\n" +
+                    "3、参数文件中如有多个参数，一个参数一列，两列间用一个空格\" \"分隔；\n" +
+                    "4、目前最多支持4个参数。\n" +
+                    "===================================================================\n" +
+                    "结果输出区域\n";
+            LogUtil.clearLog(jTextArea_out,content);
         }else if(jButton_clearErr == e.getSource()){
-            clearError();
+            String content = "报错输出区域\n";
+            LogUtil.clearLog(jTextArea_err,content);
         }else if(jButton_start == e.getSource()) {
 //            redirectLog();
             LogUtil.redirectLog(jTextArea_out,jTextArea_err);
@@ -337,27 +345,4 @@ class JdbcGui implements ActionListener {
         }
     }
 
-    /**
-     * 清理结果日志
-     */
-    private void clearOut(){
-//            清空outArea 的数据
-        jTextArea_out.setText("");
-        jTextArea_out.setText("温馨提示：\n" +
-                "1、参数文件需要准备足够的行数，大于或等于 并发数x迭代次数；\n" +
-                "2、参数个数要与sql中的?个数对应；\n" +
-                "3、参数文件中如有多个参数，一个参数一列，两列间用一个空格\" \"分隔;\n" +
-                "4、目前最多支持4个参数。\n" +
-                "===================================================================\n" +
-                "结果输出区域\n");
-    }
-
-    /**
-     * 清理报错日志
-     */
-    private void clearError(){
-//        清空errorArea 的数据
-        jTextArea_err.setText("");
-        jTextArea_err.setText("报错信息输出区域\n");
-    }
 }

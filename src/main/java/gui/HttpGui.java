@@ -178,9 +178,11 @@ class HttpGui implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(jButton_clearOut == e.getSource()){
-            clearOut();
+            String content = "结果输出区域\n";
+            LogUtil.clearLog(jTextArea_out,content);
         }else if(jButton_clearErr == e.getSource()){
-            clearErr();
+            String content = "报错输出区域\n";
+            LogUtil.clearLog(jTextArea_err,content);
         }else if(jButton_start == e.getSource()){
             LogUtil.redirectLog(jTextArea_out,jTextArea_err);
 //            读取文本框的参数
@@ -218,14 +220,6 @@ class HttpGui implements ActionListener {
         }
     }
 
-    private void clearOut(){
-        jTextArea_out.setText("");
-        jTextArea_out.setText("结果输出区域：\n");
-    }
 
-    private void clearErr(){
-        jTextArea_err.setText("");
-        jTextArea_err.setText("报错输出区域：\n");
-    }
 
 }

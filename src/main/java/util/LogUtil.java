@@ -56,4 +56,13 @@ public class LogUtil extends OutputStream {
         jTextArea_out.setCaretPosition(jTextArea_out.getDocument().getLength());
         jTextArea_err.setCaretPosition(jTextArea_err.getDocument().getLength());
     }
+
+    /**
+     * 清理日志输出区域jTextArea
+     * @param jTextArea
+     * @param string
+     */
+    public static void clearLog(JTextArea jTextArea,String string){
+        jTextArea.setText(string);
+    }
 }
