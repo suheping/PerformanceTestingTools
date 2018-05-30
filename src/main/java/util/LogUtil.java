@@ -1,6 +1,9 @@
 package util;
 
+import gui.JdbcGui;
+
 import javax.swing.*;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -47,14 +50,23 @@ public class LogUtil extends OutputStream {
      * 重定向日志输出到jTextArea_out、jTextArea_err
      * 并把光标定位到最后一行
      */
-    public static void redirectLog(JTextArea jTextArea_out,JTextArea jTextArea_err){
+    public static void redirectErrorLog(JTextArea jTextArea_err){
+        //        日志输出重定向
+        LogUtil errLogUtil = new LogUtil(jTextArea_err);
+        System.setErr(new PrintStream(errLogUtil));
+        jTextArea_err.setCaretPosition(jTextArea_err.getDocument().getLength());
+    }
+
+    public static void redirectOutLog(JTextArea jTextArea_out){
         //        日志输出重定向
         LogUtil infoLogUtil = new LogUtil(jTextArea_out);
-        LogUtil errLogUtil = new LogUtil(jTextArea_err);
         System.setOut(new PrintStream(infoLogUtil));
-        System.setErr(new PrintStream(errLogUtil));
         jTextArea_out.setCaretPosition(jTextArea_out.getDocument().getLength());
-        jTextArea_err.setCaretPosition(jTextArea_err.getDocument().getLength());
+    }
+
+    public static void jdbcOutLog(String string){
+        JdbcGui.jTextArea_out.append(string + "\n");
+        JdbcGui.jTextArea_out.setCaretPosition(JdbcGui.jTextArea_out.getDocument().getLength());
     }
 
     /**
@@ -65,4 +77,5 @@ public class LogUtil extends OutputStream {
     public static void clearLog(JTextArea jTextArea,String string){
         jTextArea.setText(string);
     }
+
 }

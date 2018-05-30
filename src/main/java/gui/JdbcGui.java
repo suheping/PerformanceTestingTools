@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class JdbcGui implements ActionListener {
+public class JdbcGui implements ActionListener {
 
 //    定义jdbc工具最底层面板
     JTabbedPane jTabbedPane_jdbc;
@@ -20,7 +20,7 @@ class JdbcGui implements ActionListener {
     private JTextField jTextField_driver, jTextField_url, jTextField_user, jTextField_passwd, jTextField_initsize;
     private JTextField jTextField_maxtotal, jTextField_maxwait, jTextField_maxidle, jTextField_minidle;
 //    定义文本域
-    private JTextArea jTextArea_out, jTextArea_err;
+    public static JTextArea jTextArea_out, jTextArea_err;
 
 
     JdbcGui(){
@@ -275,7 +275,9 @@ class JdbcGui implements ActionListener {
             LogUtil.clearLog(jTextArea_err,content);
         }else if(jButton_start == e.getSource()) {
 //            redirectLog();
-            LogUtil.redirectLog(jTextArea_out,jTextArea_err);
+//            LogUtil.redirectLog(jTextArea_out,jTextArea_err);
+//            LogUtil.initLog(jTextArea_out);
+            LogUtil.redirectErrorLog(jTextArea_err);
             if (QueryTest.jdbcDriver == null) { //判断是否已经配置数据库连接池
 //                提示请配置数据库连接池
                 JOptionPane.showMessageDialog(Gui.jFrame, "请配置数据库连接池", "提示", JOptionPane.WARNING_MESSAGE);

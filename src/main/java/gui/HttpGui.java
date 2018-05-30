@@ -184,7 +184,7 @@ class HttpGui implements ActionListener {
             String content = "报错输出区域\n";
             LogUtil.clearLog(jTextArea_err,content);
         }else if(jButton_start == e.getSource()){
-            LogUtil.redirectLog(jTextArea_out,jTextArea_err);
+            LogUtil.redirectErrorLog(jTextArea_err);
 //            读取文本框的参数
             String threadCount = jTextField_threadCount.getText();
             String iterator = jTextField_iterator.getText();

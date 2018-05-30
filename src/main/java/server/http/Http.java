@@ -11,17 +11,19 @@ import java.util.concurrent.CountDownLatch;
 
 public class Http implements Runnable {
     private CountDownLatch latch;
+    private CloseableHttpClient httpClient;
+
 
     Http(CountDownLatch latch){
         this.latch = latch;
+        //        从连接池中取连接
+        HttpUtil httpUtil = new HttpUtil(HttpTest.maxTotal,HttpTest.maxPerRoute);
+        this.httpClient = httpUtil.getClient();
+
     }
 
     @Override
     public void run() {
-        //        从连接池中取连接
-        HttpUtil httpUtil = new HttpUtil(HttpTest.maxTotal,HttpTest.maxPerRoute);
-        CloseableHttpClient httpClient = httpUtil.getClient();
-
         HttpGet httpGet = new HttpGet(HttpTest.url);
 //        请求配置信息
         RequestConfig config = RequestConfig.custom().setConnectTimeout(HttpTest.connectionTimeout) // 创建连接的最长时间

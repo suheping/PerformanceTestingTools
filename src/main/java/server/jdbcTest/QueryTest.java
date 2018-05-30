@@ -54,9 +54,11 @@ public class QueryTest {
         //    加载参数
         if ( 0 < paramNum){  //如果有参数，读取参数；没有就不读取
             params = LoadParamFromFile.fileToList(paramFile);
+        }else {
+            params = null;
         }
 //        实例化DBUtil --- 调用DBUtil的构造方法，创建连接池
-        new DBUtil();
+//        new DBUtil();
         final CountDownLatch latch = new CountDownLatch(threadCount*iterator);
 //        实例化要进行压测的业务
         Query query = new Query(latch);
@@ -75,8 +77,8 @@ public class QueryTest {
 //        所有线程运行结束后，进行数据统计
         CountUtil.count(responseTimeList,threadCount,iterator);
 //        所有线程运行结束，释放连接池
-        DBUtil.closeConnection();
+//        DBUtil.closeConnection();
 //        本地测试完成，连接池置为null
-        DBUtil.releaseDbcp();
+//        DBUtil.releaseDbcp();
     }
 }
