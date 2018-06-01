@@ -31,7 +31,7 @@ public class Query implements Runnable{
         try {
 //            System.out.println(Thread.currentThread().getName() + " started ------------");
 //            从连接池取连接
-            JdbcTemplate jdbcTemplate = JdbcPool.getCon();
+//            JdbcTemplate jdbcTemplate = JdbcPool.getCon();
             List<Map<String, Object>> res = null;
 //            System.out.println(Thread.currentThread().getName() + " connected to db-------");
 //            LogUtil.redirectOutLog(JdbcGui.jTextArea_out);
@@ -39,23 +39,23 @@ public class Query implements Runnable{
             for(int i =1; i<=QueryTest.iterator; i++){  //开始迭代
                 //                记录开始时间
                 startTime = System.currentTimeMillis();
-                if(params == null && QueryTest.paramNum == 0){
-                    res = jdbcTemplate.queryForList(QueryTest.SQL);
+                if( QueryTest.paramNum == 0){
+                    res = QueryTest.jdbcTemplate.queryForList(QueryTest.SQL);
                 }else {
                     String string = params[(threadId-1)*block + i];
                     //                发起jdbc请求
                     switch (QueryTest.paramNum){   //判断参数个数
                         case 1:
-                            res = jdbcTemplate.queryForList(QueryTest.SQL,string);
+                            res = QueryTest.jdbcTemplate.queryForList(QueryTest.SQL,string);
                             break;
                         case 2:
-                            res = jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1]);
+                            res = QueryTest.jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1]);
                             break;
                         case 3:
-                            res = jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1], string.split(" ")[2]);
+                            res = QueryTest.jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1], string.split(" ")[2]);
                             break;
                         case 4:
-                            res = jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1], string.split(" ")[2], string.split(" ")[3]);
+                            res = QueryTest.jdbcTemplate.queryForList(QueryTest.SQL, string.split(" ")[0], string.split(" ")[1], string.split(" ")[2], string.split(" ")[3]);
                             break;
                         default:
                             break;

@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class HttpGui implements ActionListener {
+public class HttpGui implements ActionListener {
 
     JTabbedPane jTabbedPane_http;
     private JComboBox<String> jComboBox_type;
@@ -19,7 +19,7 @@ class HttpGui implements ActionListener {
     private JTextField jTextField_socketTimeout, jTextField_requestTimeout, jTextField_maxTotal, jTextField_maxPerRoute;
 
     //    定义文本域
-    private JTextArea jTextArea_out, jTextArea_err;
+    public static JTextArea jTextArea_out, jTextArea_err;
 
     HttpGui(){
 //        定义主面板

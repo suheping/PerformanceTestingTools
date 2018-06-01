@@ -259,9 +259,7 @@ public class JdbcGui implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(jButton_apply ==e.getSource()){
-            loadJdbcConfig();
-        }else if(jButton_clearOut == e.getSource()){
+        if(jButton_clearOut == e.getSource()){
             String content = "温馨提示：\n" +
                     "1、参数文件需要准备足够的行数，大于或等于 并发数x迭代次数；\n" +
                     "2、参数个数要与sql中的?个数对应；\n" +
@@ -274,38 +272,46 @@ public class JdbcGui implements ActionListener {
             String content = "报错输出区域\n";
             LogUtil.clearLog(jTextArea_err,content);
         }else if(jButton_start == e.getSource()) {
-//            redirectLog();
-//            LogUtil.redirectLog(jTextArea_out,jTextArea_err);
-//            LogUtil.initLog(jTextArea_out);
+//            重定向日志输出
             LogUtil.redirectErrorLog(jTextArea_err);
-            if (QueryTest.jdbcDriver == null) { //判断是否已经配置数据库连接池
-//                提示请配置数据库连接池
-                JOptionPane.showMessageDialog(Gui.jFrame, "请配置数据库连接池", "提示", JOptionPane.WARNING_MESSAGE);
-//                自动切换到数据库连接池配置页面
-                jTabbedPane_jdbc.setSelectedIndex(1);
+            //        读取信息，存入变量
+            //    声明获取的值
+            System.out.println("读取变量");
+            String threadCountText = jTextField_threadCount.getText();
+            String iteratorText = jTextField_iterator.getText();
+            String paramNum = jTextField_paramNum.getText();
+            String SQLText = jTextField_sql.getText();
+            String paramFile = jTextField_paramFile.getText();
+            if (threadCountText.equals("") || iteratorText.equals("") || SQLText.equals("") || paramNum.equals("") ) {
+                JOptionPane.showMessageDialog(Gui.jFrame, "请输入并发数等相关参数", "提示", JOptionPane.WARNING_MESSAGE);
             } else {
-                //        读取信息，存入变量
-                //    声明获取的值
-                String threadCountText = jTextField_threadCount.getText();
-                String iteratorText = jTextField_iterator.getText();
-                String paramNum = jTextField_paramNum.getText();
-                String SQLText = jTextField_sql.getText();
-                String paramFile = jTextField_paramFile.getText();
-                if (threadCountText.equals("") || iteratorText.equals("") || SQLText.equals("")) {
-                    JOptionPane.showMessageDialog(Gui.jFrame, "请输入并发数等相关参数", "提示", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    QueryTest.threadCount = Integer.parseInt(threadCountText);
-                    QueryTest.iterator = Integer.parseInt(iteratorText);
-                    QueryTest.paramNum = Integer.parseInt(paramNum);
-                    QueryTest.SQL = SQLText;
-                    QueryTest.paramFile = paramFile;
-//                  执行数据库压力测试程序，进行测试
-//                  如果接下来的业务处理耗时较长，那么jframe就会出现假死现象，所以要单独开辟线程来出来，不占用主线程
+                QueryTest.threadCount = Integer.parseInt(threadCountText);
+                QueryTest.iterator = Integer.parseInt(iteratorText);
+                QueryTest.paramNum = Integer.parseInt(paramNum);
+                QueryTest.SQL = SQLText;
+                if(QueryTest.paramNum > 0 && QueryTest.paramNum < 5) { //如果参数个数合法
+                    if (paramFile.equals("")) { // 判断是否填写了参数文件
+                        JOptionPane.showMessageDialog(Gui.jFrame, "请输入参数文件路径", "提示", JOptionPane.WARNING_MESSAGE);
+                    } else { // 参数个数合法，参数文件路径已填写
+                        QueryTest.paramFile = paramFile;
+//                        执行数据库压力测试程序，进行测试
+//                        如果接下来的业务处理耗时较长，那么jframe就会出现假死现象，所以要单独开辟线程来出来，不占用主线程
+                        new Thread(new Runnable() {
+                            public void run() {
+                                QueryTest.pTest_jdbc();
+                            }
+                        }).start();
+                    }
+                }else if(QueryTest.paramNum == 0){ // 如果不需要参数
+//                    执行数据库压力测试程序，进行测试
+//                    如果接下来的业务处理耗时较长，那么jframe就会出现假死现象，所以要单独开辟线程来出来，不占用主线程
                     new Thread(new Runnable() {
                         public void run() {
                             QueryTest.pTest_jdbc();
                         }
                     }).start();
+                }else { // 如果参数不合法
+                    JOptionPane.showMessageDialog(Gui.jFrame,"参数个数必须为[0,1,2,3,4]中的一个","提示",JOptionPane.WARNING_MESSAGE);
                 }
             }
         }

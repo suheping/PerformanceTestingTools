@@ -1,7 +1,9 @@
 package server.jdbcTest;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import util.CountUtil;
 import util.DBUtil;
+import util.JdbcPool;
 import util.LoadParamFromFile;
 
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ public class QueryTest {
 //    响应时间数组
     private static List<Long> responseTimeList = new ArrayList<>();
 
+    public static JdbcTemplate jdbcTemplate;
+
 
     /**
      * 定义setValue方法，向responseTimeList中传值
@@ -51,6 +55,8 @@ public class QueryTest {
      * 开始执行压测
      */
     public static void pTest_jdbc (){
+        jdbcTemplate = JdbcPool.getCon();
+
         //    加载参数
         if ( 0 < paramNum){  //如果有参数，读取参数；没有就不读取
             params = LoadParamFromFile.fileToList(paramFile);

@@ -1,7 +1,9 @@
 package server.http;
 
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import util.CountUtil;
+import util.HttpUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,8 @@ public class HttpTest{
     public static int connectionTimeout, requestTimeout, socketTimeout;
     //    响应时间数组
     private static List<Long> responseTimeList = new ArrayList<>();
+
+    public static HttpUtil httpUtil;
 
 //    static String urlGet = "http://www.sys.choicesoft.com.cn:66/choicedms/www/index.php/log-record-.html?browserLanguage=zh-CN&resolution=1366+X+728";
 //    static String urlPost = "http://gateway.dev.choicesaas.cn/olp-takeout/openapi/elemeOrderOperate/orderOperate";
@@ -30,6 +34,9 @@ public class HttpTest{
 
 
     public static void pTest_http() {
+        //        从连接池中取连接
+        httpUtil = new HttpUtil(maxTotal,maxPerRoute);
+
 //        mapHeaders.put("Content-Type","application/json;charset=utf-8");
 //        Http_bak httpBak = new Http_bak(httpWait,socketWait);
         final CountDownLatch latch = new CountDownLatch(threadCount*iterator);

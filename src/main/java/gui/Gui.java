@@ -1,8 +1,11 @@
 package gui;
 
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import javax.swing.*;
 import java.awt.*;
 
+//@SpringBootApplication
 public class Gui {
 //    定义最底层JFrame
     static JFrame jFrame = new JFrame("性能测试工具");

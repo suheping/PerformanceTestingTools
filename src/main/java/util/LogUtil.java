@@ -1,5 +1,6 @@
 package util;
 
+import gui.HttpGui;
 import gui.JdbcGui;
 
 import javax.swing.*;
@@ -67,6 +68,11 @@ public class LogUtil extends OutputStream {
     public static void jdbcOutLog(String string){
         JdbcGui.jTextArea_out.append(string + "\n");
         JdbcGui.jTextArea_out.setCaretPosition(JdbcGui.jTextArea_out.getDocument().getLength());
+    }
+
+    public static void httpOutLog(String string){
+        HttpGui.jTextArea_out.append(string + "\n");
+        HttpGui.jTextArea_out.setCaretPosition(HttpGui.jTextArea_out.getDocument().getLength());
     }
 
     /**
