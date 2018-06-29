@@ -1,12 +1,10 @@
 package server.http;
 
 
-import org.apache.http.impl.client.CloseableHttpClient;
 import util.CountUtil;
 import util.HttpUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 public class HttpTest{
@@ -17,8 +15,11 @@ public class HttpTest{
     public static int connectionTimeout, requestTimeout, socketTimeout;
     //    响应时间数组
     private static List<Long> responseTimeList = new ArrayList<>();
-
-    public static HttpUtil httpUtil;
+    static HttpUtil httpUtil;
+//    存储form类型请求参数的map
+    public static Map<String,String> map = new HashMap<>();
+//    请求参数类型
+    public static String param_type;
 
 //    static String urlGet = "http://www.sys.choicesoft.com.cn:66/choicedms/www/index.php/log-record-.html?browserLanguage=zh-CN&resolution=1366+X+728";
 //    static String urlPost = "http://gateway.dev.choicesaas.cn/olp-takeout/openapi/elemeOrderOperate/orderOperate";
@@ -40,19 +41,31 @@ public class HttpTest{
 //        mapHeaders.put("Content-Type","application/json;charset=utf-8");
 //        Http_bak httpBak = new Http_bak(httpWait,socketWait);
         final CountDownLatch latch = new CountDownLatch(threadCount*iterator);
-        Http http = new Http(latch);
 
-        for(int i =1; i<= threadCount; i++){
-            Thread t = new Thread(http);
-            t.setName(""+ i);
-            t.start();
+//        判断请求类型，选择要执行的类
+        if("GET".equals(type)){  //get
+            Http_get http_get = new Http_get(latch);
+            for(int i =1; i<= threadCount; i++){
+                Thread t = new Thread(http_get);
+                t.setName(""+ i);
+                t.start();
+            }
+        }else if ("POST".equals(type)){  //post
+            System.out.println("执行post");
+            //判断form类型还是json类型参数
+            if("form".equals(param_type)){
+                System.out.println("执行form类型post");
+            }else if ("json".equals(param_type)){
+                System.out.println("执行json类型post");
+            }
         }
+
         try {
             latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 //        所有线程运行完成，开始统计数据
-        CountUtil.count(responseTimeList,threadCount,iterator);
+        CountUtil.count("http",responseTimeList,threadCount,iterator);
     }
 }

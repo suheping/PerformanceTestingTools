@@ -81,7 +81,7 @@ public class QueryTest {
             e.printStackTrace();
         }
 //        所有线程运行结束后，进行数据统计
-        CountUtil.count(responseTimeList,threadCount,iterator);
+        CountUtil.count("jdbc",responseTimeList,threadCount,iterator);
 //        所有线程运行结束，释放连接池
 //        DBUtil.closeConnection();
 //        本地测试完成，连接池置为null

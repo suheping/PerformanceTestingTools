@@ -4,19 +4,25 @@ import server.http.HttpTest;
 import util.LogUtil;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 public class HttpGui implements ActionListener {
 
+//    http测试同居最底层面板
     JTabbedPane jTabbedPane_http;
+//    定义请求类型
     private JComboBox<String> jComboBox_type;
     //    定义按钮
     private JButton jButton_start,jButton_clearOut, jButton_clearErr;
+    private JButton jButton_add, jButton_del;
     //    定义文本框
     private JTextField jTextField_threadCount, jTextField_iterator, jTextField_url,jTextField_connectionTimeout;
     private JTextField jTextField_socketTimeout, jTextField_requestTimeout, jTextField_maxTotal, jTextField_maxPerRoute;
+    private DefaultTableModel tableModel;
 
     //    定义文本域
     public static JTextArea jTextArea_out, jTextArea_err;
@@ -35,14 +41,41 @@ public class HttpGui implements ActionListener {
         JSplitPane jSplitPane_bottom = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         jSplitPane1.setTopComponent(jSplitPane_top);
         jSplitPane1.setBottomComponent(jSplitPane_bottom);
-//        param、button区
-        JPanel jPanel_param = new JPanel();
+//        param区使用split面板，
+//      上部为普通配置区-普通面板，
+//      下部为http请求参数区，包含两部分 请求头和body --split面板
+//      请求头： 表单以及按钮--split面板（jscroll和jpanel）
+//        body： 分为两个tab页：一个form表单，一个json
+//        form表单：分为上下两部分：表单以及按钮 -- split面板（jscroll和jpanel）
+//        json：jscroll，带jtextarea
+        JSplitPane jSplitPane_param = new JSplitPane(JSplitPane.VERTICAL_SPLIT); //param区
+        JPanel jPanel_normal_param = new JPanel(); //上部普通参数区
+        JSplitPane jSplitPane_http = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT); //下部http请求参数区
+        JSplitPane jSplitPane_header = new JSplitPane(JSplitPane.VERTICAL_SPLIT); //请求头区
+        JScrollPane jScrollPane_header_param = new JScrollPane(); //请求头参数区
+        JPanel jPanel_header_button = new JPanel();  //请求头按钮区
+        JTabbedPane jTabbedPane_body = new JTabbedPane(JTabbedPane.TOP); //请求body区
+        JSplitPane jSplitPane_body_form = new JSplitPane(JSplitPane.VERTICAL_SPLIT); //body_form区
+        JScrollPane jScrollPane_body_form_param = new JScrollPane(); // body_form 参数区
+        JPanel jPanel_body_form_button = new JPanel(); //body_form 按钮区
+        JScrollPane jScrollPane_json = new JScrollPane(); //body_json区
+        JTextArea jTextArea_json = new JTextArea(); //json输入框
+        jScrollPane_json.setViewportView(jTextArea_json); //将json输入框放到body_json区上
+        jSplitPane_body_form.setTopComponent(jScrollPane_body_form_param); //将body_form参数区放到body_form区上部
+        jSplitPane_body_form.setBottomComponent(jPanel_body_form_button); //将body_form按钮区放到body_form区下部
+        jSplitPane_param.setTopComponent(jPanel_normal_param); //
+        jSplitPane_param.setBottomComponent(jSplitPane_body_form);
+        jSplitPane_body_form.setResizeWeight(0.99);
+//        button区使用普通面板
         JPanel jPanel_button = new JPanel();
+//        两个日志输出区域使用jscroll面板
         JScrollPane jScrollPane_out = new JScrollPane();
         JScrollPane jScrollPane_err = new JScrollPane();
-        jSplitPane_top.setLeftComponent(jPanel_param);
+//        将参数区和按钮区加到上部面板中
+        jSplitPane_top.setLeftComponent(jSplitPane_param);
         jSplitPane_top.setRightComponent(jPanel_button);
-        jSplitPane_top.setResizeWeight(0.7);
+        jSplitPane_top.setResizeWeight(0.9);
+
 //        out、err区
         jSplitPane_bottom.setLeftComponent(jScrollPane_out);
         jSplitPane_bottom.setRightComponent(jScrollPane_err);
@@ -55,6 +88,7 @@ public class HttpGui implements ActionListener {
         jButton_clearErr = new JButton("清空报错");
 
 //        定义参数区
+//        上部普通参数
         JLabel jLabel_threadcount = new JLabel("并发数：");
         jTextField_threadCount = new JTextField(5);
         JLabel jLabel_iterator = new JLabel("迭代次数：");
@@ -65,7 +99,7 @@ public class HttpGui implements ActionListener {
         jComboBox_type.insertItemAt("POST",1);
         jComboBox_type.setSelectedIndex(0);
         JLabel jLabel_url = new JLabel("请求URL：");
-        jTextField_url = new JTextField(50);
+        jTextField_url = new JTextField(500);
         JLabel jLabel_connectionTimeout = new JLabel("连接超时时间：");
         jTextField_connectionTimeout = new JTextField(5);
         JLabel jLabel_requestTimeout = new JLabel("请求超时时间");
@@ -76,6 +110,31 @@ public class HttpGui implements ActionListener {
         jTextField_maxTotal = new JTextField(5);
         JLabel jLabel_maxPerRoute = new JLabel("每个路由最大连接数");
         jTextField_maxPerRoute = new JTextField(5);
+//        下部请求参数
+//        实例化jtable
+        //    定义参数表
+        JTable jTable = new JTable(0, 1);
+        tableModel = (DefaultTableModel) jTable.getModel();
+//        设置数据
+        Vector data = new Vector();
+//        设置表头
+        Vector names = new Vector();
+        names.add("字段名");
+        names.add("字段值");
+//        set
+        tableModel.setDataVector(data,names);
+//        设置每列的宽度
+        jTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        jTable.getColumnModel().getColumn(1).setPreferredWidth(300);
+//        设置不自动调整宽度
+        jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        jScrollPane_body_form_param.setViewportView(jTable);
+//        http参数区按钮
+        jButton_add = new JButton("添加一行");
+        jButton_del = new JButton("删除最后一行");
+        jPanel_body_form_button.add(jButton_add);
+        jPanel_body_form_button.add(jButton_del);
+
 
 //        定义jTextArea_out、jTextArea_out
         jTextArea_out = new JTextArea();
@@ -86,19 +145,11 @@ public class HttpGui implements ActionListener {
         jTextArea_err.setText("报错输出区域：\n");
 
 //        布局
-//        按钮区布局   - 默认流式布局
-        jPanel_button.add(jButton_start);
-        jPanel_button.add(jButton_clearOut);
-        jPanel_button.add(jButton_clearErr);
-
-//        参数区布局
-//        使用网格流式布局
+//        按钮区布局   - 网格流式布局
         GridBagLayout gridBagLayout = new GridBagLayout();
-        jPanel_param.setLayout(gridBagLayout);
+        jPanel_button.setLayout(gridBagLayout);
         GridBagConstraints gbc = new GridBagConstraints();
-//        多个组件均分区域
-        gbc.weightx = 1;
-        gbc.weighty = 1;
+
 //        填充
         gbc.fill = GridBagConstraints.HORIZONTAL;
 //        居左
@@ -107,69 +158,90 @@ public class HttpGui implements ActionListener {
 //          第一行：
         gbc.gridx = 1;
         gbc.gridy = 1;
-        jPanel_param.add(jLabel_threadcount,gbc);
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        jPanel_param.add(jTextField_threadCount,gbc);
-        gbc.gridx = 3;
-        gbc.gridy = 1;
-        jPanel_param.add(jLabel_iterator,gbc);
-        gbc.gridx = 4;
-        gbc.gridy = 1;
-        jPanel_param.add(jTextField_iterator,gbc);
-        gbc.gridx = 5;
-        gbc.gridy = 1;
-        jPanel_param.add(jLabel_type,gbc);
-        gbc.gridx = 6;
-        gbc.gridy = 1;
-        jPanel_param.add(jComboBox_type,gbc);
+        jPanel_button.add(jButton_start,gbc);
 //        第二行
         gbc.gridx = 1;
         gbc.gridy = 2;
-        jPanel_param.add(jLabel_url,gbc);
+        jPanel_button.add(jButton_clearOut,gbc);
+//        第三行
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        jPanel_button.add(jButton_clearErr,gbc);
+
+//        参数区布局
+//        使用网格流式布局
+        jPanel_normal_param.setLayout(gridBagLayout);
+//        多个组件均分区域
+        gbc.weightx =1;
+        gbc.weighty =1;
+//        组件位置
+//          第一行：
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jLabel_threadcount,gbc);
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jTextField_threadCount,gbc);
+        gbc.gridx = 3;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jLabel_iterator,gbc);
+        gbc.gridx = 4;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jTextField_iterator,gbc);
+        gbc.gridx = 5;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jLabel_type,gbc);
+        gbc.gridx = 6;
+        gbc.gridy = 1;
+        jPanel_normal_param.add(jComboBox_type,gbc);
+//        第二行
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        jPanel_normal_param.add(jLabel_url,gbc);
         gbc.gridx = 2;
         gbc.gridy = 2;
         gbc.gridwidth = 5;
-        jPanel_param.add(jTextField_url,gbc);
+        jPanel_normal_param.add(jTextField_url,gbc);
 //        第三行
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.gridwidth =1;
-        jPanel_param.add(jLabel_connectionTimeout,gbc);
+        jPanel_normal_param.add(jLabel_connectionTimeout,gbc);
         gbc.gridx = 2;
         gbc.gridy = 3;
-        jPanel_param.add(jTextField_connectionTimeout,gbc);
+        jPanel_normal_param.add(jTextField_connectionTimeout,gbc);
         gbc.gridx = 3;
         gbc.gridy = 3;
-        jPanel_param.add(jLabel_requestTimeout,gbc);
+        jPanel_normal_param.add(jLabel_requestTimeout,gbc);
         gbc.gridx = 4;
         gbc.gridy = 3;
-        jPanel_param.add(jTextField_requestTimeout,gbc);
+        jPanel_normal_param.add(jTextField_requestTimeout,gbc);
         gbc.gridx = 5;
         gbc.gridy = 3;
-        jPanel_param.add(jLabel_socketTimeout,gbc);
+        jPanel_normal_param.add(jLabel_socketTimeout,gbc);
         gbc.gridx = 6;
         gbc.gridy = 3;
-        jPanel_param.add(jTextField_socketTimeout,gbc);
+        jPanel_normal_param.add(jTextField_socketTimeout,gbc);
 //        第四行
         gbc.gridx = 1;
         gbc.gridy = 4;
-        jPanel_param.add(jLabel_maxTotal,gbc);
+        jPanel_normal_param.add(jLabel_maxTotal,gbc);
         gbc.gridx = 2;
         gbc.gridy = 4;
-        jPanel_param.add(jTextField_maxTotal,gbc);
+        jPanel_normal_param.add(jTextField_maxTotal,gbc);
         gbc.gridx = 3;
         gbc.gridy = 4;
-        jPanel_param.add(jLabel_maxPerRoute,gbc);
+        jPanel_normal_param.add(jLabel_maxPerRoute,gbc);
         gbc.gridx = 4;
         gbc.gridy = 4;
-        jPanel_param.add(jTextField_maxPerRoute,gbc);
-
+        jPanel_normal_param.add(jTextField_maxPerRoute,gbc);
 
 
         jButton_start.addActionListener(this);
         jButton_clearOut.addActionListener(this);
         jButton_clearErr.addActionListener(this);
+        jButton_add.addActionListener(this);
+        jButton_del.addActionListener(this);
 
     }
 
@@ -183,9 +255,18 @@ public class HttpGui implements ActionListener {
         }else if(jButton_clearErr == e.getSource()){
             String content = "报错输出区域\n";
             LogUtil.clearLog(jTextArea_err,content);
-        }else if(jButton_start == e.getSource()){
+        }else if(jButton_add == e.getSource()){
+//            添加一行参数
+            tableModel.addRow(new Object[]{"",""});
+        }else if (jButton_del == e.getSource()){
+//            删除最后一行参数
+            if(tableModel.getRowCount()>=1){
+                tableModel.removeRow(tableModel.getRowCount()-1);
+            }
+        }
+        else if(jButton_start == e.getSource()){
             LogUtil.redirectErrorLog(jTextArea_err);
-//            读取文本框的参数
+//            读取基础配置参数
             String threadCount = jTextField_threadCount.getText();
             String iterator = jTextField_iterator.getText();
             String type = (String) jComboBox_type.getSelectedItem();
@@ -209,6 +290,15 @@ public class HttpGui implements ActionListener {
                 HttpTest.socketTimeout = Integer.parseInt(socketTimeout);
                 HttpTest.maxTotal = Integer.parseInt(maxTotal);
                 HttpTest.maxPerRoute = Integer.parseInt(maxPerRoute);
+                //            读取http请求参数
+                int rowCount = tableModel.getRowCount();
+                for(int i=0; i<rowCount; i++){
+                    Object key = tableModel.getValueAt(i,0);
+                    System.out.println(key.toString());
+                    Object value = tableModel.getValueAt(i,1);
+                    System.out.println(value.toString());
+                    HttpTest.map.put(key.toString(),value.toString());
+                }
 
                 new Thread(new Runnable() {
                     @Override
