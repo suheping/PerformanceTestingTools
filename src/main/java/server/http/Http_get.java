@@ -41,9 +41,6 @@ public class Http_get implements Runnable {
         this.httpUtil = HttpTest.httpUtil;
     }
 
-    private void p_start(){
-
-    }
 
     @Override
     public void run() {
@@ -58,8 +55,8 @@ public class Http_get implements Runnable {
             httpPost = new HttpPost(HttpTest.url);
             httpPost.setConfig(config);
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            for(String key:HttpTest.map.keySet()){
-                params.add(new BasicNameValuePair(key, HttpTest.map.get(key)));
+            for(String key:HttpTest.map_body.keySet()){
+                params.add(new BasicNameValuePair(key, HttpTest.map_body.get(key)));
             }
             try {
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -125,15 +122,6 @@ public class Http_get implements Runnable {
                 e.printStackTrace();
             }
         }
-
-
-
-
-
-
-
-
-
 
     }
 }

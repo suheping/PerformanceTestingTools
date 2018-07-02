@@ -16,10 +16,21 @@ public class HttpTest{
     //    响应时间数组
     private static List<Long> responseTimeList = new ArrayList<>();
     static HttpUtil httpUtil;
-//    存储form类型请求参数的map
-    public static Map<String,String> map = new HashMap<>();
+//    存储body_form请求参数的map
+    public static Map<String,String> map_body = new HashMap<>();
+//    存储header_form
+    public static Map<String,String> map_header = new HashMap<>();
+//    存储assert参数的list
+    public static List<String> list_assert = new ArrayList<>();
+//    存储body_json的String
+    public static String body_json;
+//    存储body_text的String
+    public static String body_text;
 //    请求参数类型
     public static String param_type;
+//    断言参数类型
+    public static String assert_type = "or";
+
 
 //    static String urlGet = "http://www.sys.choicesoft.com.cn:66/choicedms/www/index.php/log-record-.html?browserLanguage=zh-CN&resolution=1366+X+728";
 //    static String urlPost = "http://gateway.dev.choicesaas.cn/olp-takeout/openapi/elemeOrderOperate/orderOperate";
@@ -44,9 +55,10 @@ public class HttpTest{
 
 //        判断请求类型，选择要执行的类
         if("GET".equals(type)){  //get
-            Http_get http_get = new Http_get(latch);
+//            Http_get http_get = new Http_get(latch);
+            Get get = new Get(latch);
             for(int i =1; i<= threadCount; i++){
-                Thread t = new Thread(http_get);
+                Thread t = new Thread(get);
                 t.setName(""+ i);
                 t.start();
             }
