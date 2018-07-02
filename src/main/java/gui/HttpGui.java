@@ -425,7 +425,8 @@ public class HttpGui implements ActionListener {
                 }
 //                    判断请求body为哪种类型
                 if (jTabbedPane_body.getSelectedIndex() == 0){
-//                    向前选中body_form
+//                    当前选中body_form
+                    HttpTest.param_type = "form";
 //                    读取http_body_form请求参数
                     int rowCount_body = tableModel_body_form.getRowCount();
                     for(int i=0; i<rowCount_body; i++){
@@ -439,9 +440,11 @@ public class HttpGui implements ActionListener {
                     }
                 }else if (jTabbedPane_body.getSelectedIndex() == 1){
 //                    当前选中body_json
+                    HttpTest.param_type="json";
                     HttpTest.body_json = jTextArea_json.getText();
                 }else if (jTabbedPane_body.getSelectedIndex() == 2){
 //                    当前选中body_text
+                    HttpTest.param_type="text";
                     HttpTest.body_text = jTextArea_text.getText();
                 }
 

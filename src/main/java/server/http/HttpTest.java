@@ -53,7 +53,7 @@ public class HttpTest{
 //        Http_bak httpBak = new Http_bak(httpWait,socketWait);
         final CountDownLatch latch = new CountDownLatch(threadCount*iterator);
 
-//        判断请求类型，选择要执行的类
+//        判断请求类型，选择要执行的请求
         if("GET".equals(type)){  //get
 //            Http_get http_get = new Http_get(latch);
             Get get = new Get(latch);
@@ -64,11 +64,13 @@ public class HttpTest{
             }
         }else if ("POST".equals(type)){  //post
             System.out.println("执行post");
-            //判断form类型还是json类型参数
+            //判断form、json还是text类型参数
             if("form".equals(param_type)){
                 System.out.println("执行form类型post");
             }else if ("json".equals(param_type)){
                 System.out.println("执行json类型post");
+            }else if ("text".equals(param_type)){
+                System.out.println("执行text类型post");
             }
         }
 
