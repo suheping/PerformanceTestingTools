@@ -81,5 +81,9 @@ public class HttpTest{
         }
 //        所有线程运行完成，开始统计数据
         CountUtil.count("http",responseTimeList,threadCount,iterator);
+        list_assert.clear();
+        map_body.clear();
+        map_header.clear();
+
     }
 }
