@@ -1,6 +1,5 @@
 package server.http;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -10,6 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import util.AssertTools;
 import util.HttpUtil;
 import util.LogUtil;
 import util.param_tools.UUIDTools;
@@ -29,7 +29,7 @@ public class Get implements Runnable{
         this.httpUtil = HttpTest.httpUtil;
     }
 
-    //           请求配置信息
+//    请求配置信息
     private RequestConfig config = RequestConfig.custom().setConnectTimeout(HttpTest.connectionTimeout) // 创建连接的最长时间
             .setConnectionRequestTimeout(HttpTest.requestTimeout) // 从连接池中获取到连接的最长时间
             .setSocketTimeout(HttpTest.socketTimeout) // 数据传输的最长时间10s
@@ -75,41 +75,8 @@ public class Get implements Runnable{
                 startTime = System.currentTimeMillis();
                 HttpResponse httpResponse = httpClient.execute(httpGet); //发送请求
                 endTime = System.currentTimeMillis();
-                int code = httpResponse.getStatusLine().getStatusCode();
-                boolean successFlag = false; //声明成功与否变量
-                if (200 == code){ //如果状态码为200，就去做响应断言
-                    HttpEntity httpEntity = httpResponse.getEntity();
-                    String response = EntityUtils.toString(httpEntity);
-                    System.out.println(response);
-//                    如果响应断言为空，那么flag为true
-                    if (HttpTest.list_assert.size() == 0){
-                        successFlag = true;
-                    }else { // 进行断言判断
-                        for (String str:HttpTest.list_assert){ //遍历所有断言字符串
-                            if ("and".equals(HttpTest.assert_type)) {
-//                            如果断言类型为and，
-//                            判断响应中是否包含str，如果包含flag为true，
-//                              如果不包含，flag为false，跳出循环
-                                if (response.contains(str)) {
-                                    successFlag = true;
-                                } else {
-                                    successFlag = false;
-                                    break;
-                                }
-                            }else if ("or".equals(HttpTest.assert_type)){
-//                            如果断言类型为or
-//                            判断响应中是否包含str，如果包含flag为true，跳出循环
-                                if(response.contains(str)){
-                                    successFlag = true;
-                                    break;
-                                }else {
-                                    successFlag = false;
-                                }
-                            }
-                        }
-                    }
-                } //响应断言结束
-                HttpTest.list_assert.clear();
+                AssertTools assertTools = new AssertTools();
+                Boolean successFlag = assertTools.responseAssert(httpResponse); //响应断言
 //                如果flag为true，记录数据
                 if (successFlag){
                     responseTime = endTime - startTime;

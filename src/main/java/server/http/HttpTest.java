@@ -67,8 +67,20 @@ public class HttpTest{
             //判断form、json还是text类型参数
             if("form".equals(param_type)){
                 System.out.println("执行form类型post");
+                PostForm postForm = new PostForm(latch);
+                for (int i=1; i<=threadCount; i++){
+                    Thread t = new Thread(postForm);
+                    t.setName(""+i);
+                    t.start();
+                }
             }else if ("json".equals(param_type)){
                 System.out.println("执行json类型post");
+                PostJson postJson = new PostJson(latch);
+                for (int i=1; i<=threadCount; i++){
+                    Thread t = new Thread(postJson);
+                    t.setName(""+i);
+                    t.start();
+                }
             }else if ("text".equals(param_type)){
                 System.out.println("执行text类型post");
             }
@@ -84,6 +96,5 @@ public class HttpTest{
         list_assert.clear();
         map_body.clear();
         map_header.clear();
-
     }
 }
