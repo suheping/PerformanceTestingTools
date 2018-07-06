@@ -2,13 +2,16 @@ package gui;
 
 import server.http.HttpTest;
 import util.LogUtil;
+import util.ScriptUtil;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
 
 public class HttpGui implements ActionListener {
 
@@ -17,7 +20,7 @@ public class HttpGui implements ActionListener {
 //    定义请求类型
     private JComboBox<String> jComboBox_type;
     //    定义按钮
-    private JButton jButton_start,jButton_clearOut, jButton_clearErr;
+    private JButton jButton_start,jButton_clearOut, jButton_clearErr,jButton_open,jButton_save;
     private JButton jButton_add_body_form, jButton_del_body_form, jButton_add_header_form, jButton_del_header_form;
     //    定义文本框
     private JTextField jTextField_threadCount, jTextField_iterator, jTextField_url,jTextField_connectionTimeout;
@@ -97,7 +100,7 @@ public class HttpGui implements ActionListener {
 //        将参数区和按钮区+断言区加到上部面板中
         jSplitPane_top.setLeftComponent(jSplitPane_param);
         jSplitPane_top.setRightComponent(jSplitPane_button_assert);
-        jSplitPane_top.setResizeWeight(0.9);
+        jSplitPane_top.setResizeWeight(0.99);
 
 //        out、err区
         jSplitPane_bottom.setLeftComponent(jScrollPane_out);
@@ -109,6 +112,8 @@ public class HttpGui implements ActionListener {
         jButton_start = new JButton("执行");
         jButton_clearOut = new JButton("清空结果");
         jButton_clearErr = new JButton("清空报错");
+        jButton_open = new JButton("打开脚本");
+        jButton_save =new JButton("保存脚本");
 
 //        断言区
         jPanel_assert.setLayout(new BorderLayout());
@@ -140,8 +145,7 @@ public class HttpGui implements ActionListener {
 //        jPanel.add(jTable);
         JScrollPane jScrollPane = new JScrollPane(jTable);
         jPanel_assert.add(jScrollPane,BorderLayout.CENTER);
-
-//        按钮区
+//        断言按钮区
         JPanel jPanel_south = new JPanel();
         jButton_assert_add = new JButton("添加");
         jButton_assert_del = new JButton("删除");
@@ -149,7 +153,7 @@ public class HttpGui implements ActionListener {
         jPanel_south.add(jButton_assert_del);
         jPanel_assert.add(jPanel_south,BorderLayout.SOUTH);
 
-//        定义参数区
+//        参数区
 //        上部普通参数
         JLabel jLabel_threadcount = new JLabel("并发数：");
         jTextField_threadCount = new JTextField(5);
@@ -164,13 +168,13 @@ public class HttpGui implements ActionListener {
         jTextField_url = new JTextField(500);
         JLabel jLabel_connectionTimeout = new JLabel("连接超时时间：");
         jTextField_connectionTimeout = new JTextField(5);
-        JLabel jLabel_requestTimeout = new JLabel("请求超时时间");
+        JLabel jLabel_requestTimeout = new JLabel("请求超时时间：");
         jTextField_requestTimeout = new JTextField(5);
         JLabel  jLabel_socketTimeout = new JLabel("socket超时时间：");
         jTextField_socketTimeout = new JTextField(5);
-        JLabel jLabel_maxTotal = new JLabel("最大连接数");
+        JLabel jLabel_maxTotal = new JLabel("最大连接数：");
         jTextField_maxTotal = new JTextField(5);
-        JLabel jLabel_maxPerRoute = new JLabel("每个路由最大连接数");
+        JLabel jLabel_maxPerRoute = new JLabel("每个路由最大连接数：");
         jTextField_maxPerRoute = new JTextField(5);
 //        下部请求参数
 //        实例化jtable_header_form
@@ -234,7 +238,16 @@ public class HttpGui implements ActionListener {
         jTextArea_err.setText("报错输出区域：\n");
 
 //        布局
+        jPanel_button.add(jButton_start);
+        jPanel_button.add(jButton_clearOut);
+        jPanel_button.add(jButton_clearErr);
+        jPanel_button.add(jButton_open);
+        jPanel_button.add(jButton_save);
+
+
+
 //        按钮区布局   - 网格流式布局
+
         GridBagLayout gridBagLayout = new GridBagLayout();
         jPanel_button.setLayout(gridBagLayout);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -245,17 +258,14 @@ public class HttpGui implements ActionListener {
         gbc.anchor = GridBagConstraints.WEST;
 //        组件位置
 //          第一行：
-        gbc.gridx = 1;
         gbc.gridy = 1;
         jPanel_button.add(jButton_start,gbc);
-//        第二行
-        gbc.gridx = 1;
-        gbc.gridy = 2;
         jPanel_button.add(jButton_clearOut,gbc);
-//        第三行
-        gbc.gridx = 1;
-        gbc.gridy = 3;
         jPanel_button.add(jButton_clearErr,gbc);
+//        第二行
+        gbc.gridy = 2;
+        jPanel_button.add(jButton_save,gbc);
+        jPanel_button.add(jButton_open,gbc);
 
 //        参数区布局
 //        使用网格流式布局
@@ -337,6 +347,8 @@ public class HttpGui implements ActionListener {
         jRadioButton_or.addActionListener(this);
         jButton_assert_add.addActionListener(this);
         jButton_assert_del.addActionListener(this);
+        jButton_save.addActionListener(this);
+        jButton_open.addActionListener(this);
 
     }
 
@@ -368,7 +380,7 @@ public class HttpGui implements ActionListener {
             }
         }else if(jButton_assert_add == e.getSource()){
 //            assert添加一行
-            tableModel_assert.addRow(new Object[]{"",""});
+            tableModel_assert.addRow(new Object[]{""});
         }else if(jButton_assert_del == e.getSource()){
 //            assert删除最后一行
             if (tableModel_assert.getRowCount() >=1){
@@ -447,8 +459,6 @@ public class HttpGui implements ActionListener {
                     HttpTest.param_type="text";
                     HttpTest.body_text = jTextArea_text.getText();
                 }
-
-
 //                新起线程转向后台服务
                 new Thread(new Runnable() {
                     @Override
@@ -457,6 +467,176 @@ public class HttpGui implements ActionListener {
                     }
                 }).start();
             }
+        }else if (jButton_save == e.getSource()){
+//            保存脚本
+//            System.out.println("保存脚本");
+//            开始读取界面上所有的数据
+            String threadCount = jTextField_threadCount.getText();
+            String itrearor = jTextField_iterator.getText();
+            int type = jComboBox_type.getSelectedIndex();
+            String url = jTextField_url.getText();
+            String connectionTimeout = jTextField_connectionTimeout.getText();
+            String requestTimeout = jTextField_requestTimeout.getText();
+            String socketTimeout = jTextField_socketTimeout.getText();
+            String maxTotal = jTextField_maxTotal.getText();
+            String maxPerRoute = jTextField_maxPerRoute.getText();
+//                读取http_header请求参数
+            int rowCount_header = tableModel_header_form.getRowCount();
+            Map<String,String> headers = new HashMap<>();
+            for(int i=0; i<rowCount_header; i++){
+                Object key = tableModel_header_form.getValueAt(i,0);
+                Object value = tableModel_header_form.getValueAt(i,1);
+                if(key !=""){
+                    headers.put(key.toString(),value.toString());
+                }
+            }
+//                    判断请求body为哪种类型
+            int param_type = -1;
+            String body = null;
+            if (jTabbedPane_body.getSelectedIndex() == 0){
+//                    当前选中body_form
+                param_type = 0;
+//                    读取http_body_form请求参数
+                int rowCount_body = tableModel_body_form.getRowCount();
+                Map<String,String> body_form = new HashMap<>();
+                for(int i=0; i<rowCount_body; i++){
+                    Object key = tableModel_body_form.getValueAt(i,0);
+                    Object value = tableModel_body_form.getValueAt(i,1);
+                    if(key !=""){
+                        body_form.put(key.toString(),value.toString());
+                    }
+                }
+                body = body_form.toString();
+            }else if (jTabbedPane_body.getSelectedIndex() == 1){
+//                    当前选中body_json
+                param_type= 1;
+                body = jTextArea_json.getText();
+            }else if (jTabbedPane_body.getSelectedIndex() == 2){
+//                    当前选中body_text
+                param_type= 2;
+                body = jTextArea_text.getText();
+            }
+//                读取断言列表的参数
+            String assert_type = null;
+            if (jRadioButton_and.isSelected()){
+                assert_type = "and";
+            }else {
+                assert_type = "or";
+            }
+            int rowCount_assert = tableModel_assert.getRowCount();
+            List<String> list_assert = new ArrayList<>();
+            for (int i=0; i<rowCount_assert; i++){
+                Object value = tableModel_assert.getValueAt(i,0);
+                if(value !=""){
+                    list_assert.add(value.toString());
+                }
+            }
+//            将以上读取到的参数存入变量
+            List<String> param_list = new LinkedList<>();
+            param_list.add(threadCount);
+            param_list.add(itrearor);
+            param_list.add("" + type);
+            param_list.add(url);
+            param_list.add(connectionTimeout);
+            param_list.add(requestTimeout);
+            param_list.add(socketTimeout);
+            param_list.add(maxTotal);
+            param_list.add(maxPerRoute);
+            param_list.add(headers.toString());
+            param_list.add(""+param_type);
+            param_list.add(body);
+            param_list.add(assert_type);
+            param_list.add(list_assert.toString());
+
+            ScriptUtil scriptUtil = new ScriptUtil();
+            scriptUtil.save(param_list);
+
+
+
+        }else if (jButton_open == e.getSource()){
+//            打开脚本
+//            System.out.println("打开脚本");
+            ScriptUtil scriptUtil = new ScriptUtil();
+            List<String> param_list = new ArrayList<>();
+            try {
+                param_list = scriptUtil.open();
+                if (param_list.size()>0){ //如果取到了脚本数据，将数据填写到工具相应位置
+                    jTextField_threadCount.setText(param_list.get(0));
+                    jTextField_iterator.setText(param_list.get(1));
+                    jComboBox_type.setSelectedIndex(Integer.parseInt(param_list.get(2)));
+                    jTextField_url.setText(param_list.get(3));
+                    jTextField_connectionTimeout.setText(param_list.get(4));
+                    jTextField_requestTimeout.setText(param_list.get(5));
+                    jTextField_socketTimeout.setText(param_list.get(6));
+                    jTextField_maxTotal.setText(param_list.get(7));
+                    jTextField_maxPerRoute.setText(param_list.get(8));
+//                    读取headers
+                    while (true){ //现清空header列表
+                        if(tableModel_header_form.getRowCount()>0){
+                            tableModel_header_form.removeRow(0);
+                        }else {
+                            break;
+                        }
+                    }
+                    String header_content = param_list.get(9);
+                    String header_content_new = header_content.substring(1,header_content.length()-1);
+                    String[] header_contents =header_content_new.split(",");
+                    for (String str : header_contents){
+                        String[] key_value = str.split("=");
+                        tableModel_header_form.addRow(new Object[]{key_value[0].trim(),key_value[1].trim()});
+                    }
+                    int body_type = Integer.parseInt(param_list.get(10));
+                    jTabbedPane_body.setSelectedIndex(body_type);
+//                    读取body信息
+                    if (body_type==0){ // form表单
+                        while (true){
+                            if (tableModel_body_form.getRowCount()>0){
+                                tableModel_body_form.removeRow(0);
+                            }else {
+                                break;
+                            }
+                        }
+                        String form_content = param_list.get(11);
+                        String form_content_new = form_content.substring(1,form_content.length()-1);
+                        String[] form_contents = form_content_new.split(",");
+                        for (String str: form_contents){
+                            String[] key_value = str.split("=");
+                            tableModel_body_form.addRow(new Object[]{key_value[0].trim(),key_value[1].trim()});
+                        }
+                    }else if (body_type==1){ //json
+                        jTextArea_json.setText(param_list.get(11));
+                    }else if (body_type==2){ //text
+                        jTextArea_text.setText(param_list.get(11));
+                    }else {
+                        System.err.println("脚本文件错误，请检查第11、12行数据！");
+                    }
+
+                    if ("and".equals(param_list.get(12))){
+                        jRadioButton_and.setSelected(true);
+                        jRadioButton_or.setSelected(false);
+                    }else {
+                        jRadioButton_or.setSelected(true);
+                        jRadioButton_and.setSelected(false);
+                    }
+//                  读取断言列表
+                    while (true){
+                        if (tableModel_assert.getRowCount()>0){
+                            tableModel_assert.removeRow(0);
+                        }else {
+                            break;
+                        }
+                    }
+                    String assert_content = param_list.get(13);
+                    String assert_content_new = assert_content.substring(1,assert_content.length()-1);
+                    String[] assert_contents = assert_content_new.split(",");
+                    for (String assert_parm : assert_contents){
+                        tableModel_assert.addRow(new Object[]{assert_parm.trim()});
+                    }
+                }
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
         }
     }
 
